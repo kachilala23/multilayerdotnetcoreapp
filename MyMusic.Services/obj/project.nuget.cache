@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "4VHY78cIKoWQ+lHhqfS2wu4d+cE2l/oqlgHgZ5Q41K1Gqq9hLaga0h3LQTNGAXFifIOTIN12EXdJ47Q17Saysg==",
+  "success": true,
+  "projectFilePath": "C:\\NETCORE3\\MyMusic\\MyMusic.Services\\MyMusic.Services.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Obaro\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
