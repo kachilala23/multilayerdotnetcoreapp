@@ -1,0 +1,117 @@
+﻿dotnet new solution
+dotnet new webapi -o MyMusic.Api
+dotnet new classlib -o MyMusic.Core
+dotnet new classlib -o MyMusic.Services
+dotnet new classlib -o MyMusic.Data
+
+dotnet sln add MyMusic.Api/MyMusic.Api.csproj MyMusic.Core/MyMusic.Core.csproj 
+MyMusic.Data/MyMusic.Data.csproj MyMusic.Services/MyMusic.Services.csproj
+
+dotnet add MyMusic.Api/MyMusic.Api.csproj reference MyMusic.Core/MyMusic.Core.csproj 
+MyMusic.Services/MyMusic.Services.csproj
+
+dotnet add MyMusic.Data/MyMusic.Data.csproj reference MyMusic.Core/MyMusic.Core.csproj
+
+dotnet add MyMusic.Data/MyMusic.Data.csproj reference MyMusic.Core/MyMusic.Core.csproj
+
+dotnet add MyMusic.Services/MyMusic.Services.csproj reference MyMusic.Core/MyMusic.Core.csproj
+
+dotnet add MyMusic.Api/MyMus/ic.Api.csproj reference 
+MyMusic.Services/MyMusic.Services.csproj MyMusic.Core/MyMusic.Core.csproj MyMusic.Data/MyMusic.Data.csproj
+
+Create models folder in Core project and add our two models Music and Artist.
+
+Repository Pattern and Unit of Work
+
+Repository Pattern
+
+The Repository pattern, in simple words, is encapsulating your database operations 
+(ORM or other methods of database access) in one place. Basically abstracting your 
+data access layer. This has many advantages, such as:
+
+    Reusability — You don’t need to rewrite code for accessing your database
+    Testability — You can test your database actions without data access logic
+    Separation of concerns — Your data access is responsibility only of the repository
+    Decoupled code — If you want to change persistence framework, it requires less effort
+    
+A Unit of work is responsible for keeping track of the list of changes during a transaction and committing it.
+
+Even though Entity Framework internally implements the repository pattern and unit of work pattern, 
+it is a good practice to implement ourselves the repository to decouple our project from Entity Framework. 
+This way we are not strongly bound to it and if we want to switch from this Entity Framework version to 
+another or to another ORM framework, we require much less work to do so. Also it helps when mocking 
+stuff for testing.
+
+Services
+
+Services will be the center of our business logic, the link between our API and our Data.
+
+Data Project 
+
+Entity Framework is a Object Relation Model (ORM) which basically maps all database 
+tables and columns to C# objects, making it super easy to manage data and run queries.
+
+We need the following nuget packages to help us make working with entity framework easy
+
+dotnet add MyMusic.Data/MyMusic.Data.csproj package Microsoft.EntityFrameworkCore
+dotnet add MyMusic.Data/MyMusic.Data.csproj package Microsoft.EntityFrameworkCore.Design
+dotnet add MyMusic.Data/MyMusic.Data.csproj package  Microsoft.EntityFrameworkCore.SqlServer 
+
+Configurations
+Now we need to define how our models behavior, like constraints and relations.
+We do this with configuration.
+
+Next we create our DbContext
+
+Repositories and Unit of work
+
+Remember those interfaces we created in the Core project? Now it is time 
+to implement them so we can have an interface with our DbContext.
+
+Create a folder called Repositories.
+
+First we implement the base repository (Repository.cs):
+
+After having defining all basic operations, we are ready to implement the remaining two repositories. 
+(Music and Artist Repository resectively)
+
+And for last, our Unit of Work which will wrap all repositories in one place. 
+Create a UnitOfWork.cs file in the project level.
+
+And for last we just need to add dependency injection so our application knows 
+that when we use the repository interfaces it should inject these repository implementions. 
+And now we just need to add dependency injection for our Unit Of Work in the Startup.cs of our 
+API project by adding the next code line to the ConfigureServices method:
+
+Transient vs Scoped vs Singleton
+
+You noticed that we added the dependency as Scoped. We have 3 types of dependency injection:
+
+    Transient — Objects are different. One new instance is provided to every controller and every service
+    Scoped — Objects are same through the request
+    Singleton — Objects are the same for every request during the application lifetime
+    
+ Migrations
+ 
+ We are almost over configuring Entity Framework.
+ 
+ Now we need to add the connection strings and tell our API to use it.
+ 
+ Go to appsettings.Development.json and add the ConnectionStrings.
+ 
+ Using appsettings.Development.json because it is a dev environment. 
+ What happens is when .NET Core is building, it checks every property in 
+ appsettings.json that matches with the current environment one (this case Development) 
+ and overrides these properties.
+ 
+ And now we can create our migrations with the following command:
+ 
+ dotnet ef --startup-project MyMusic.Api/MyMusic.Api.csproj migrations add InitialModel -p MyMusic.Data/MyMusic.Data.csproj
+
+--startup-project switch tells that MyMusic.Api is the entry project for our app and switch -p 
+tells that the target project of our migrations is MyMusic.Data. InitialModel is the name of this migration.
+
+To update the database
+
+dotnet ef --startup-project MyMusic.Api/MyMusic.Api.csproj database update 
+ 

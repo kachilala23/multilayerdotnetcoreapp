@@ -1,0 +1,75 @@
+﻿Create models folder and add model and make classes. 
+
+Add the following package 
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+Add dbcontext class with db set properties
+Add the connectionstring to the startup class
+Set connection string in appsetting.json
+Add initial migration with  dotnet ef migrations add InitialMigration
+dotnet ef database update
+
+Add data annotation and generate another migration and update database
+Add migration to seed the database with custom sql in the seed database then update database
+
+To reverse a database migration we make use of the last name of the last run successful migration e.g.
+dotnet ef database update AddDataAnnotation
+
+To take back to the latest migration i.e. upgrade it as the last action was down grading the db we make use of the command
+dotnet ef database update
+
+Create an empty api controller MakesController and extend ControllerBase
+Create a method GetMakes with an IEnumerable ruturn type of make.
+Create a contructor and inject the dbcontext as make the dbcontext a private readonly field.
+
+Running the application we have the following error
+
+A possible object cycle was detected which is not supported. This can either be due to a cycle or if the object depth 
+is larger than the maximum allowed depth of 32.
+
+We need to make use of DTOs but here we call it Resources. Hence we create a resource folder in the controller and 
+create the different resource we want to expose in the resource folder removing the navigation property
+Next we make us of a toool called automapper to map the models to the resource. This will enable us not to expose our main
+model rather we are exposing the resources.
+
+We make use of the package 
+dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
+
+Go to startup class and add 
+services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+Next we inject it in our constructor of the makescontroller by using the IMapper interface
+Next we make use of the _mapper to map the source type to our target type 
+		
+		[HttpGet]
+        //[Route("/api/makes")]
+        public async Task<IEnumerable<MakeResource>> GetMakes()
+        {
+           var makes = await _context.Makes.Include(m => m.Models).ToListAsync();
+           return _mapper.Map<List<Make>, List<MakeResource>>(makes);
+        }
+
+For automapper to know how to map the properties of one class to another. We create a mapping profile.
+So we will create another folder called mapping and create a class called mappingprofile which extends profile 
+we need to import automapper namespace
+
+Automapper will check if the properties in the source correspond to the one in the target. If they do it will help 
+us do the mapping else we will have to provide additional configuration.
+
+public class MappingProfile : Profile
+    {
+        public MappingProfile()
+        {
+            CreateMap<Make, MakeResource>();
+            CreateMap<Model, ModelResource>();
+        }
+    }
+
+
+
+
+
+
+
