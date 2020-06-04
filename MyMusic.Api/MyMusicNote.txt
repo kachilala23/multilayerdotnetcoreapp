@@ -114,4 +114,96 @@ tells that the target project of our migrations is MyMusic.Data. InitialModel is
 To update the database
 
 dotnet ef --startup-project MyMusic.Api/MyMusic.Api.csproj database update 
+
+Seed some data
+
+For last we can add some dummy data to our database.
+
+Just create an empty migration with
+
+dotnet ef --startup-project MyMusic.Api/MyMusic.Api.csproj migrations add SeedMusicsAndArtistsTable -p MyMusic.Data/MyMusic.Data.csproj
+
+Update database with
+dotnet ef --startup-project MyMusic.Api/MyMusic.Api.csproj database update 
+
+Services — Business Logic
+
+We arrived at our Services layer, which is responsible for our business logic and interfacing with the Data 
+Access layer. The key here is that we are gonna use the Unit Of Work to handle that interface so we don’t
+have to go adding our DbContext directly.
+
+As our API is has just simple CRUD operations, this section is not gonna be too long.
+
+Here we will be needing just the implementation of the two services interfaces defined in Core, which are 
+MusicService.cs and ArtistService.cs .
+
+Doing so, we abstract our business logic from our presentation layer, which is our API.
+
+And is just left to add dependency injection for our services as we did for the 
+Unit of work by adding the next lines to Startup.cs :
+
+API — Presenting our app
+
+Finally it is time to build our presentation layer. Here we will handle API Restful calls, 
+resource mappings and resources validation.
+Swagger
+
+First let’s add Swagger to our project to help us visualize our progress (finally). 
+To do so just add Swashbuckle package to our API project with the net commands:
+
+dotnet add MyMusic.Api/MyMusic.Api.csproj package Swashbuckle.AspNetCore --version 5.0.0-rc3
+
+Note that we are adding a Release Candidate because the last stable Swashbuckle version does not support .NET Core 3
+
+And for configuring we need to add the following commands to two methods in startup.cs
+
+ConfigureServices method add:
+
+Now, to test it, just run our application for the solutions folder with:
+
+dotnet run -p MyMusic.Api/MyMusic.Api.csproj
+
+We will see only the weather end point.
+
+So because we dont want to return our models diectly we will be making use of resources (dto)
+and making use of automaper to map our domain to our resources
+
+dotnet add MyMusic.Api/MyMusic.Api.csproj package AutoMapper.Extensions.Microsoft.DependencyInjection
+
+Enable AutoMapper by adding the next line to ConfigureServices in Startup.cs :
+
+We need make sure that our parameters have the needed values to proceed, for that we will use 
+FluentValidation by adding its package to our project with
+
+dotnet add MyMusic.Api/MyMusic.Api.csproj package FluentValidation
+
+Now we create a folder called Validators and add two files SaveArtistResourceValidator.cs and 
+SaveMusicResourceValidator.cs .
+
+And now for our CreateMusic method:
+Updating a music
+Deleting a music
+
+Conclusion
+
+This was a basic tutorial on how to leverage .NET Core and its powerful tools to create a 
+multi layer and maintainable API. 
+
+You learned how to separate your API structure in multiple module projects so we don’t have 
+a high dependency in one technology.
+
+You learned how to design a Core of an application, how to apply Repository and Unit Of Work pattern 
+and how this helps you abstract the use of ORM.
+
+Speaking of ORM, you learned how to use code first database design with Entity Framewok 
+and to build it in a very good structure way.
+
+You learned the value of a Business Layer that is not coupled to an specific ORM.
+
+In API layer you learned how to not expose your models by using Resources, how 
+to map them using AutoMapper, how to validate your inputs using 
+FluentValidation and how to use Swagger to simplify your API display.
+
+dotnet run -p MyMusic.Api/MyMusic.Api.csproj
+
  
